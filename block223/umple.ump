@@ -1,0 +1,79 @@
+namespace ca.mcgill.ecse223.block.model;
+
+class User
+{
+  username;
+  password;
+  1 -- 0..2 UserRole;
+}
+
+class UserRole
+{
+ abstract;
+}
+
+class Admin
+{
+  isA UserRole;
+  1 -- 1..99 Level;
+  1 -- * Block;
+  1 -- 1 Ball;
+  1 -- 1 Paddle;
+  1 -- 1 Game;
+}
+
+class Player
+{
+  isA UserRole;
+}
+
+class Game
+{
+  gameName;
+  Integer playAreaWidth;
+  Integer playAreaHeight;
+  1 -- * Player;
+  1 -- 1 HallOfFame;
+}
+
+class HallOfFame
+{
+   playerName;
+  Integer score;
+}
+
+class Level
+{
+  Integer levelNumber;
+  Boolean isRandom;
+}
+
+class Block
+{
+  color;
+  Integer pointValue;
+  const Integer SideSize = 20;
+  * -- * BlockArrangement;
+}
+
+class BlockArrangement
+{
+  gridPosition;
+  Integer numberOfBlocks;
+}
+
+class Ball
+{
+  Integer minSpeed;
+  Integer speedIncreaseFactor;
+  const Integer Diameter= 10;
+}
+
+class Paddle
+{
+  Integer maxLength;
+  Integer minLegth;
+  Integer minLength;
+  const Integer Width= 5;
+}
+
