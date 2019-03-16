@@ -1,0 +1,43 @@
+namespace ca.mcgill.ecse223.block.model;
+
+class Game {
+	Boolean published;
+	Boolean testMode;
+	1 <@>- 1 HallOfFame;
+	1 -- * PlaySession;
+}
+
+class Paddle {
+	Integer paddleLength;
+	Integer paddlePosition;
+}
+
+class Block {
+}
+
+class Ball {
+	Integer xPosition;
+	Integer yPosition;
+	Integer xDirection;
+	Integer yDirection;
+}
+
+class Player {
+	1 <@>- * PlaySession playSessions;
+}
+
+class PlaySession {
+	Integer lifeRemaining;
+	Integer currentScore;
+	autounique pausedGame;
+	Integer currentLevel;
+}
+
+class HallOfFame {
+	1 <@>- * HallOfFameEntry entries;
+}
+
+class HallOfFameEntry {
+	String playerName;
+	Integer highScore;
+}
