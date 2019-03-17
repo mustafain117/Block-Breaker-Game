@@ -28,7 +28,7 @@ class GameSession{
 	public void movePaddle(int offset){}
 }
 class Player{
-
+	1 <@>- * PlaySession playSessions;
 }
 class SpecificBlockAssignment{
 	Integer positionX;
@@ -46,6 +46,32 @@ class Score {
 
 class Game{
 	lazy immutable Boolean isPublished;
-	boolean inTestMode; 
+	1 <@>- 1 HallOfFame;
+	1 -- * PlaySession;
+	boolean inTestMode;
 
+}
+
+class Paddle {
+	Integer paddleLength;
+	Integer paddlePosition;
+}
+
+class Block {
+}
+
+class Ball {
+	Integer xPosition;
+	Integer yPosition;
+	Integer xDirection;
+	Integer yDirection;
+}
+
+class HallOfFame {
+	1 <@>- * HallOfFameEntry entries;
+}
+
+class HallOfFameEntry {
+	String playerName;
+	Integer highScore;
 }
