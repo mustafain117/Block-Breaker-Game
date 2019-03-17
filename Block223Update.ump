@@ -1,43 +1,51 @@
-namespace ca.mcgill.ecse223.block.model;
 
-class Game {
-	Boolean published;
-	Boolean testMode;
-	1 <@>- 1 HallOfFame;
-	1 -- * PlaySession;
+class Block223{
+	1 <@>- * GameSession gameSessions;
+	1 <@>- * Score scores;
+}
+class GameSession{
+
+	* -- 0..1 Player player;
+	* -- 1 Game game;
+	1 <@>- * SpecificBlockAssignment assignments;
+	enum BallIncidence{Downward, Upward, Left, Right, None};
+	lazy BallIncidence hitIncidence;
+	const Integer MAX_NR_LIVES=3;
+	defaulted Integer numOfLives=3;
+	defaulted Integer currentLevel=1;
+	defaulted Integer score=0;
+	defaulted Integer paddlePosition =195-getCurrentPaddleSize()/2;
+	defaulted Integer ballPositionX =195;
+	defaulted Integer ballPositionY = 195;
+	defaulted Integer ballDirectionX = game.getBall().getMinBallSpeedX();
+	defaulted Integer ballDirectionY = game.getBall().getMinBallSpeedY();
+	autounique id;
+
+	Integer currentPaddleSize= game.getPaddle().getMinPaddleLength()+
+		(currentLevel-1)*(game.getPaddle().getMaxPaddleLength()-game.getPaddle().getMinPaddleLength())/(game.getLevels().size()-1) ;
+	
+	
+	public void movePaddle(int offset){}
+}
+class Player{
+
+}
+class SpecificBlockAssignment{
+	Integer positionX;
+	Integer positionY;
+	1 -> 1 Block block; 
 }
 
-class Paddle {
-	Integer paddleLength;
-	Integer paddlePosition;
+
+
+class Score {
+	Integer score;
+	* -- 1 User user;
+	* -- 1 Game game; 
 }
 
-class Block {
-}
+class Game{
+	lazy immutable Boolean isPublished;
+	boolean inTestMode; 
 
-class Ball {
-	Integer xPosition;
-	Integer yPosition;
-	Integer xDirection;
-	Integer yDirection;
-}
-
-class Player {
-	1 <@>- * PlaySession playSessions;
-}
-
-class PlaySession {
-	Integer lifeRemaining;
-	Integer currentScore;
-	autounique pausedGame;
-	Integer currentLevel;
-}
-
-class HallOfFame {
-	1 <@>- * HallOfFameEntry entries;
-}
-
-class HallOfFameEntry {
-	String playerName;
-	Integer highScore;
 }

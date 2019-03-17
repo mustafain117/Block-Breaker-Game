@@ -11,7 +11,7 @@ class GameSession{
 			}->Playing;
 		}
 		Playing{
-		   pause() ->Paused;
+		   pausegame() ->Paused;
 		 
 		   update()[ballHitsBlock() && isLastBlock() && !gameIsAlmostDone()]{	
 		   		doJumpToNextLevel();
@@ -72,5 +72,11 @@ class GameSession{
 	private void doChangeDirection(){}
 
 	private boolean checkLineIntersect(int x1,int y1,int x2,int y2,int x3,int y3,int x4,int y4){ return false;}
+
+	private void movePaddle(String queueInput){}
+	private void moveBall(){}
+	private void testGame(){}
+
+	private void publishGame(){}
 	
 }
