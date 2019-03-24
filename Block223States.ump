@@ -1,0 +1,181 @@
+class PlayedGame {
+
+  // State Machine
+  
+  playStatus {
+    Ready {
+      entry / { doSetup(); }
+      play -> Moving;
+    }
+    Moving {
+      pause -> Paused;
+      move [hitPaddle()] / { doHitPaddleOrWall(); } -> Moving;
+      move [isOutOfBoundsAndLastLife()] / { doOutOfBounds(); } -> GameOver;
+      move [isOutOfBounds()] / { doOutOfBounds(); } -> Paused;
+      move [hitLastBlockAndLastLevel()] / { doHitBlock(); } -> GameOver;
+      move [hitLastBlock()] / { doHitBlockNextLevel(); } -> Ready;
+      move [hitBlock()] / { doHitBlock(); } -> Moving;
+      move [hitWall()] / { doHitPaddleOrWall(); } -> Moving;
+      move / { doHitNothingAndNotOutOfBounds(); } -> Moving;
+    }
+    Paused {
+      play -> Moving;
+    }
+    GameOver {
+      entry / { doGameOver(); }
+    }
+  }
+  
+  // Guards
+  
+  private boolean hitPaddle() {
+    // TODO implement
+    return false;
+  }
+  
+  private boolean isOutOfBoundsAndLastLife(){
+	   boolean outOfBounds = false;
+	   if(getLives()==1) {
+		   outOfBounds = isBallOutOfBounds();
+		   
+	   }
+    return outOfBounds;
+  }
+  
+private boolean isBallOutOfBounds(){
+    if(getCurrentBallY()>=((Game.PLAY_AREA_SIDE)-((Ball.BALL_DIAMETER)/2))) {
+	    	return true;
+	    }
+	return false;
+  }
+  
+  private boolean isOutOfBounds(){
+	   boolean outOfBounds = isBallOutOfBounds();
+	   return outOfBounds;
+    
+  }
+  
+  private boolean hitLastBlockAndLastLevel() {
+    // TODO implement
+    return false;
+  }
+  
+  private boolean hitLastBlock(){
+    // TODO implement
+    return false;
+  }
+  
+  private boolean hitBlock() {
+    // TODO implement
+    return false;
+  }
+  
+  private boolean hitWall() {
+    // TODO implement
+    return false;
+  }
+  
+  // Actions
+  
+   private void doSetup(){
+	   resetCurrentBallX();
+	   resetCurrentBallY();
+	   resetBallDirectionX();
+	   resetBallDirectionY();
+	   resetCurrentPaddleX();
+	   Game game = getGame();
+	   Level level = game.getLevel(currentLevel-1);
+	   List<BlockAssignment> assignments = level.getBlockAssignments();
+	   for(BlockAssignment assignment: assignments) {
+		   PlayedBlockAssignment pblock = new PlayedBlockAssignment(Game.WALL_PADDING+(Block.SIZE+Game.COLUMNS_PADDING)*(assignment.getGridHorizontalPosition()-1),Game.WALL_PADDING+(Block.SIZE+Game.ROW_PADDING)*(assignment.getGridVerticalPosition()-1), assignment.getBlock(), this);
+	   }
+	   while(numberOfBlocks() < game.getNrBlocksPerLevel()) {
+		   
+		   	 int n = game.getNrBlocksPerLevel();
+		   
+		   	 int maxColumn = (Game.PLAY_AREA_SIDE - 2*(Game.WALL_PADDING) + Game.COLUMNS_PADDING)/Game.COLUMNS_PADDING+Block.SIZE;
+			 int minColumn = 1;
+			 Random rC = new Random();
+			 int index_X = rC.nextInt((maxColumn - minColumn) + 1) + minColumn;
+			 
+			 int maxRow = n/maxColumn;
+			 int minRow = 1;
+			 Random rR = new Random();
+			 int index_Y = rR.nextInt((maxRow - minRow) + 1) + minRow;
+			 
+			 
+			 int positionX = Game.WALL_PADDING+(Block.SIZE+Game.COLUMNS_PADDING)*(index_X-1);
+			 
+			 int positionY = Game.WALL_PADDING+(Block.SIZE+Game.COLUMNS_PADDING)*(index_Y-1);
+	
+			 Boolean positionFound = isPositionFree(positionX,positionY);
+			 while(!positionFound) {
+				 if(index_X<15) {
+					 index_X++;
+					 positionX = Game.WALL_PADDING+(Block.SIZE+Game.COLUMNS_PADDING)*(index_X-1);
+					 }
+					 else if(index_Y<maxRow){
+						 index_Y++;
+						 index_X=1;
+						 positionY= Game.WALL_PADDING+(Block.SIZE+Game.COLUMNS_PADDING)*(index_Y-1);
+					 }
+					 else {
+						 index_X=1;
+						 index_Y=1;
+						 positionX = Game.WALL_PADDING+(Block.SIZE+Game.COLUMNS_PADDING)*(index_X-1);
+						 positionY= Game.WALL_PADDING+(Block.SIZE+Game.COLUMNS_PADDING)*(index_Y-1);
+					 }
+				 positionFound = isPositionFree(positionX,positionY);
+			 }
+		     
+			 PlayedBlockAssignment pblock = new PlayedBlockAssignment(positionX,positionY,game.getRandomBlock(),this);
+		   
+		   
+	   }
+   }
+  
+  private void doHitPaddleOrWall() {
+    // TODO implement
+  }
+
+  
+  private void doOutOfBounds(){
+	   setLives(getLives()-1);
+	   resetCurrentBallX();
+	   resetCurrentBallY();
+	   resetBallDirectionX();
+	   resetBallDirectionY();
+	   resetCurrentPaddleX();
+  }
+
+  private void doHitBlock() {
+    // TODO implement
+  }
+
+  private void doHitBlockNextLevel() {
+    // TODO implement
+  }
+
+  private void doHitNothingAndNotOutOfBounds(){
+    double x = getCurrentBallX();
+    double y = getCurrentBallY();
+    double dx = getBallDirectionX();
+    double dy = getBallDirectionY();
+    setCurrentBallX(x + dx);
+    setCurrentBallY(y + dy);
+}
+
+  private void doGameOver(){
+	   Block223 block223 = this.getBlock223();
+	   Player p= getPlayer();
+	   if(p!=null) {
+		   Game game=getGame();
+		   HallOfFameEntry hof = new HallOfFameEntry(score,playername, p, game, block223);
+		   game.setMostRecentEntry(hof);
+	   }
+	   game.delete();
+	  
+    
+  }
+
+}
