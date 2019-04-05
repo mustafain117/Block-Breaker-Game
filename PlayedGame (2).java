@@ -727,11 +727,11 @@ public class PlayedGame implements Serializable
   // line 54 "../../../../../Block223PlayMode.ump"
    private Boolean isPositionFree(int x, int y){
     for(PlayedBlockAssignment pblock : blocks) {
-         if((x==pblock.getX()) && (y==pblock.getY())) {
-           return false;
-         }
-       }
-       return true;
+				 if((x==pblock.getX()) && (y==pblock.getY())) {
+					 return false;
+				 }
+			 }
+		   return true;
   }
 
 
@@ -741,12 +741,12 @@ public class PlayedGame implements Serializable
   // line 32 "../../../../../Block223States.ump"
    private boolean hitPaddle(){
     BouncePoint bp=calculateBouncePointPaddle();
-  setBounce(bp);
+	setBounce(bp);
     return (bp!=null);
   }
 
   // line 38 "../../../../../Block223States.ump"
-    private BouncePoint calculateBouncePointPaddle(){
+    /*private BouncePoint calculateBouncePointPaddle(){
       double BallX = getCurrentBallX();
        double BallY = getCurrentBallY();
       double nextBallX = (BallX + getBallDirectionX());
@@ -827,240 +827,323 @@ public class PlayedGame implements Serializable
         }
       }
     return bp;
-    }
+    }*/
+   
+   private BouncePoint calculateBouncePointPaddle(){
+	      double BallX = getCurrentBallX();
+	       double BallY = getCurrentBallY();
+	      double nextBallX = (BallX + getBallDirectionX());
+	      double nextBallY = (BallY + getBallDirectionY());
+	      Line2D ballTrajectory = new Line2D.Double(BallX, BallY, nextBallX, nextBallY);
+	      
+	      int ballRadius = Ball.BALL_DIAMETER / 2;
+	      
+	      Rectangle2D boxA = new Rectangle2D.Double(getCurrentPaddleX(), (getCurrentPaddleY() - ballRadius), getCurrentPaddleLength(), ballRadius);
+	      Rectangle2D boxB = new Rectangle2D.Double((getCurrentPaddleX() - ballRadius), getCurrentPaddleY(), ballRadius, Paddle.PADDLE_WIDTH);
+	      Rectangle2D boxC = new Rectangle2D.Double((getCurrentPaddleX() + getCurrentPaddleLength()), getCurrentPaddleY(), ballRadius, Paddle.PADDLE_WIDTH);
+	      Rectangle2D boxE = new Rectangle2D.Double((getCurrentPaddleX() - ballRadius), (getCurrentPaddleY() - ballRadius), ballRadius, ballRadius);
+	      Rectangle2D boxF = new Rectangle2D.Double((getCurrentPaddleX() + getCurrentPaddleLength()), (getCurrentPaddleY() - ballRadius), ballRadius, ballRadius);
+	       
+	      BouncePoint bp = null;
+	      
+	      if (boxA.intersectsLine(ballTrajectory)) {
+	        if (BallY >= 350) {
+	          Line2D lineA = new Line2D.Double((getCurrentPaddleX() - getCurrentPaddleLength()), (getCurrentPaddleY() - ballRadius), getCurrentPaddleX(), (getCurrentPaddleY() - ballRadius));
+	          Point2D intersection = calculateIntersectPoint(ballTrajectory, lineA);
+	          bp = new BouncePoint(intersection.getX(), intersection.getY(), BounceDirection.FLIP_Y);
+	        }
+	      }
+	      else if (boxB.intersectsLine(ballTrajectory)) {
+	        if (BallX >= getCurrentPaddleX() - ballRadius) {
+	          Line2D lineB = new Line2D.Double((getCurrentPaddleX() - ballRadius), getCurrentPaddleY(), (getCurrentPaddleX() - ballRadius), (getCurrentPaddleY() + Paddle.PADDLE_WIDTH));
+	          Point2D intersection = calculateIntersectPoint(ballTrajectory, lineB);
+	          bp = new BouncePoint(intersection.getX(), intersection.getY(), BounceDirection.FLIP_X);
+	        }
+	      }
+	      else if (boxC.intersectsLine(ballTrajectory)) {
+	        if (BallX <= getCurrentPaddleX() + getCurrentPaddleLength() + ballRadius) {
+	          Line2D lineC = new Line2D.Double((getCurrentPaddleX() + getCurrentPaddleLength() + ballRadius), getCurrentPaddleY(), (getCurrentPaddleX() + getCurrentPaddleLength() + ballRadius), (getCurrentPaddleY() + Paddle.PADDLE_WIDTH));
+	          Point2D intersection = calculateIntersectPoint(ballTrajectory, lineC);
+	          bp = new BouncePoint(intersection.getX(), intersection.getY(), BounceDirection.FLIP_X);
+	        }
+	      }
+	      else if (boxE.intersectsLine(ballTrajectory)) {
+	        CircleArc2D arcE = new CircleArc2D(getCurrentPaddleX(), getCurrentPaddleY(), ballRadius, 89, 92);
+	        math.geom2d.line.Line2D traj1 = new math.geom2d.line.Line2D(BallX, BallY, nextBallX, nextBallY);
+	        double intX = 0;
+	        double intY = 0;
+	        Collection<math.geom2d.Point2D> intersects = arcE.intersections(traj1);
+	        if (intersects.size() != 0) {
+	          for (math.geom2d.Point2D point : intersects) {
+	            intX = point.getX();
+	            intY = point.getY();
+	          }
+	        }
+	        else { return null; }
+	        
+	        if (getBallDirectionX() < 0) {
+	          bp = new BouncePoint(intX, intY, BounceDirection.FLIP_Y);
+	        }
+	        else {
+	          bp = new BouncePoint(intX, intY, BounceDirection.FLIP_X);
+	        }
+	      }
+	      else if (boxF.intersectsLine(ballTrajectory)) {
+	        CircleArc2D arcF = new CircleArc2D((getCurrentPaddleX() + getCurrentPaddleLength()), getCurrentPaddleY(), ballRadius, -1, 92);
+	        math.geom2d.line.Line2D traj2 = new math.geom2d.line.Line2D(BallX, BallY, nextBallX, nextBallY);
+	        double intX = 0;
+	        double intY = 0;
+	        Collection<math.geom2d.Point2D> intersects = arcF.intersections(traj2);
+	        if (intersects.size() != 0) {
+	          for (math.geom2d.Point2D point : intersects) {
+	            intX = point.getX();
+	            intY = point.getY();
+	          }
+	        }
+	        else { return null; }
+	        
+	        if (getBallDirectionX() < 0) {
+	          bp = new BouncePoint(intX, intY, BounceDirection.FLIP_X);
+	        }
+	        else {
+	          bp = new BouncePoint(intX, intY, BounceDirection.FLIP_Y);
+	        }
+	      }
+	    return bp;
+	    }
 
     
   // line 43 "../../../../../Block223States.ump"
    private boolean isOutOfBoundsAndLastLife(){
     boolean outOfBounds = false;
-     if(getLives()==1) {
-       outOfBounds = isBallOutOfBounds();
-       
-     }
+	   if(getLives()==1) {
+		   outOfBounds = isBallOutOfBounds();
+		   
+	   }
     return outOfBounds;
   }
 
   // line 52 "../../../../../Block223States.ump"
    private boolean isBallOutOfBounds(){
     if(getCurrentBallY()>=((Game.PLAY_AREA_SIDE)-((Ball.BALL_DIAMETER)/2))) {
-        return true;
-      }
-  return false;
+	    	return true;
+	    }
+	return false;
   }
 
   // line 59 "../../../../../Block223States.ump"
    private boolean isOutOfBounds(){
     boolean outOfBounds = isBallOutOfBounds();
-     return outOfBounds;
+	   return outOfBounds;
   }
 
   // line 65 "../../../../../Block223States.ump"
    private boolean hitLastBlockAndLastLevel(){
     Game game = getGame();
-     
-     int nrLevels = game.numberOfLevels();
-     
-     setBounce(null);
-     
-     if (nrLevels == currentLevel)
-     {
-       int nrBlocks = game.numberOfBlocks();
-       
-       if(nrBlocks == 1)
-       {
-    PlayedBlockAssignment block = getBlock(0);
-      
-  
-      BouncePoint bp = calculateBouncePointBlock(block);
-      
-      setBounce(bp);  
-    
-      // returns null if no bounce points found
-    return (bp!=null);
-       }
-     }
-   return false;
+	   
+	   int nrLevels = game.numberOfLevels();
+	   
+	   setBounce(null);
+	   
+	   if (nrLevels == currentLevel)
+	   {
+		   int nrBlocks = game.numberOfBlocks();
+		   
+		   if(nrBlocks == 1)
+		   {
+		PlayedBlockAssignment block = getBlock(0);
+			
+	
+			BouncePoint bp = calculateBouncePointBlock(block);
+			
+			setBounce(bp);  
+		
+			// returns null if no bounce points found
+		return (bp!=null);
+		   }
+	   }
+	 return false;
   }
 
   // line 92 "../../../../../Block223States.ump"
    private boolean hitLastBlock(){
     int nrBlocks = numberOfBlocks();
-     setBounce(null);
-     if (nrBlocks == 1)
-     {
-       PlayedBlockAssignment block = getBlock(0);
-       
-       BouncePoint bp = calculateBouncePointBlock(block);
-       
-       setBounce(bp);
-       
-    return (bp!=null);
-     }
-     return false;
+	   setBounce(null);
+	   if (nrBlocks == 1)
+	   {
+		   PlayedBlockAssignment block = getBlock(0);
+		   
+		   BouncePoint bp = calculateBouncePointBlock(block);
+		   
+		   setBounce(bp);
+		   
+		return (bp!=null);
+	   }
+	   return false;
   }
 
   // line 108 "../../../../../Block223States.ump"
    private boolean hitBlock(){
     int nrBlocks = numberOfBlocks();
-     setBounce(null);
-     for (int index = 0; index<= nrBlocks-1; index++)
-     {
-       PlayedBlockAssignment block = getBlock(index);
-       BouncePoint bp = calculateBouncePointBlock(block);
-       BouncePoint bounce = getBounce();
-      
-      boolean closer = isCloser(bp, bounce);
-      
-      if (closer)
-      {
-      setBounce(bp);
-      }
-       
-     }
-     return (getBounce()!= null);
+	   setBounce(null);
+	   for (int index = 0; index<= nrBlocks-1; index++)
+	   {
+		   PlayedBlockAssignment block = getBlock(index);
+		   BouncePoint bp = calculateBouncePointBlock(block);
+		   BouncePoint bounce = getBounce();
+		  
+		  boolean closer = isCloser(bp, bounce);
+		  
+		  if (closer)
+		  {
+			setBounce(bp);
+		  }
+		   
+	   }
+	   return (getBounce()!= null);
   }
 
   // line 129 "../../../../../Block223States.ump"
    private boolean isCloser(BouncePoint first, BouncePoint second){
     if (second==null)
-  {
-  return true;
-  }
-  if(first == null)
-  {
-    return false;
-  }
-  
+	{
+	return true;
+	}
+	if(first == null)
+	{
+		return false;
+	}
+	
 double Dist_a =  Math.sqrt( ((first.getX() - getCurrentBallX())*(first.getX() - getCurrentBallX())) 
-    + ((first.getY() - getCurrentBallY())*(first.getY() - getCurrentBallY())));
+		+ ((first.getY() - getCurrentBallY())*(first.getY() - getCurrentBallY())));
 
-    
+		
 double Dist_b =  Math.sqrt( ((second.getX() - getCurrentBallX())*(second.getX() - getCurrentBallX())) 
-    + ((second.getY() - getCurrentBallY())*(second.getY() - getCurrentBallY())));
+		+ ((second.getY() - getCurrentBallY())*(second.getY() - getCurrentBallY())));
 
 if (Dist_a<Dist_b)
 {
  return true;
 }
 
-  return false;
+	return false;
   }
 
   // line 157 "../../../../../Block223States.ump"
    private BouncePoint calculateBouncePointBlock(PlayedBlockAssignment block){
     double blockX = 25 * (block.getX() - 1); 
-      double blockY = 22 * (block.getY() - 1);
-      
-    
-      
-      Rectangle2D rect = new Rectangle2D.Double(blockX, blockY, 30, 30);
-      java.awt.geom.Ellipse2D ball = new java.awt.geom.Ellipse2D.Double(this.getCurrentBallX() + this.getBallDirectionX(), this.getCurrentBallY() + this.getBallDirectionY(), 10, 10);
-      if(!rect.getBounds2D().intersects(ball.getBounds2D())) return null;
-      
-    
-      
-      if(blockY > this.getCurrentBallY())
-      {
-      
-        if((this.getCurrentBallX() + this.getBallDirectionX()) != blockX || (this.getCurrentBallX() + this.getBallDirectionX()) != (blockX + 20)) {
-          return new BouncePoint(((2*currentBallX + ballDirectionX)*(blockY - 5)/(2*currentBallY + ballDirectionY)), blockY - 5, BouncePoint.BounceDirection.FLIP_Y);
-        }
-      
-        
-        if((this.getCurrentBallX() + this.getBallDirectionX()) == blockX && (this.getCurrentBallX() + this.getBallDirectionX() < this.getCurrentBallX())) { 
-          return new BouncePoint(((2*currentBallX + ballDirectionX)*(blockY - 5)/(2*currentBallY + ballDirectionY)), blockY - 5, BouncePoint.BounceDirection.FLIP_Y);
-        }
-      
-        if((currentBallX + ballDirectionX) == blockX && (currentBallX + ballDirectionX) > currentBallX) {
-          return new BouncePoint(((2*currentBallX + ballDirectionX)*(blockY - 5)/(2*currentBallY + ballDirectionY)), blockY - 5, BouncePoint.BounceDirection.FLIP_X);
-        }
-      
-        if((this.getCurrentBallX() + this.getBallDirectionX()) == (blockX + 20) && (currentBallX + ballDirectionX) < currentBallX) {
-          return new BouncePoint(((2*currentBallX + ballDirectionX)*(blockY - 5)/(2*currentBallY + ballDirectionY)), blockY - 5, BouncePoint.BounceDirection.FLIP_X);
-        }
-    
-        if((currentBallX + ballDirectionX) == (blockX + 20) && (currentBallX + ballDirectionX) > currentBallX) {
-        return new BouncePoint(((2*currentBallX + ballDirectionX)*(blockY - 5)/(2*currentBallY + ballDirectionY)), blockY - 5, BouncePoint.BounceDirection.FLIP_Y);
-        }
-      }
-      
-   
-      
-      if((blockY + 20) < this.getCurrentBallY())
-      {
-      
-        if((this.getCurrentBallX() + this.getBallDirectionX()) != blockX || (this.getCurrentBallX() + this.getBallDirectionX()) != (blockX + 20)) {
-          return new BouncePoint(((2*currentBallX + ballDirectionX)*(blockY + 25)/(2*currentBallY + ballDirectionY)), blockY + 25, BouncePoint.BounceDirection.FLIP_Y);
-        }
-    
-        if((this.getCurrentBallX() + this.getBallDirectionX()) == blockX && (currentBallX + ballDirectionX) < currentBallX) {
-          return new BouncePoint(((2*currentBallX + ballDirectionX)*(blockY + 25)/(2*currentBallY + ballDirectionY)), blockY + 25, BouncePoint.BounceDirection.FLIP_Y);
-        }
-      
-        if((currentBallX + ballDirectionX) == blockX && (currentBallX + ballDirectionX) > currentBallX) {
-          return new BouncePoint(((2*currentBallX + ballDirectionX)*(blockY + 25)/(2*currentBallY + ballDirectionY)), blockY + 25, BouncePoint.BounceDirection.FLIP_X);
-        }
-  
-        if((this.getCurrentBallX() + this.getBallDirectionX()) == (blockX + 20) && (currentBallX + ballDirectionX) < currentBallX) {
-          return new BouncePoint(((2*currentBallX + ballDirectionX)*(blockY + 25)/(2*currentBallY + ballDirectionY)), blockY + 25, BouncePoint.BounceDirection.FLIP_X);
-        }
+	  	double blockY = 22 * (block.getY() - 1);
+	  	
+	  
+	  	
+	  	Rectangle2D rect = new Rectangle2D.Double(blockX, blockY, 30, 30);
+	  	java.awt.geom.Ellipse2D ball = new java.awt.geom.Ellipse2D.Double(this.getCurrentBallX() + this.getBallDirectionX(), this.getCurrentBallY() + this.getBallDirectionY(), 10, 10);
+	  	if(!rect.getBounds2D().intersects(ball.getBounds2D())) return null;
+	  	
+	  
+	  	
+	  	if(blockY > this.getCurrentBallY())
+	  	{
+	  	
+	  		if((this.getCurrentBallX() + this.getBallDirectionX()) != blockX || (this.getCurrentBallX() + this.getBallDirectionX()) != (blockX + 20)) {
+	  			return new BouncePoint(((2*currentBallX + ballDirectionX)*(blockY - 5)/(2*currentBallY + ballDirectionY)), blockY - 5, BouncePoint.BounceDirection.FLIP_Y);
+	  		}
+	  	
+	  		
+	  		if((this.getCurrentBallX() + this.getBallDirectionX()) == blockX && (this.getCurrentBallX() + this.getBallDirectionX() < this.getCurrentBallX())) { 
+	  			return new BouncePoint(((2*currentBallX + ballDirectionX)*(blockY - 5)/(2*currentBallY + ballDirectionY)), blockY - 5, BouncePoint.BounceDirection.FLIP_Y);
+	  		}
+	  	
+	  		if((currentBallX + ballDirectionX) == blockX && (currentBallX + ballDirectionX) > currentBallX) {
+	  			return new BouncePoint(((2*currentBallX + ballDirectionX)*(blockY - 5)/(2*currentBallY + ballDirectionY)), blockY - 5, BouncePoint.BounceDirection.FLIP_X);
+	  		}
+	  	
+	  		if((this.getCurrentBallX() + this.getBallDirectionX()) == (blockX + 20) && (currentBallX + ballDirectionX) < currentBallX) {
+	  			return new BouncePoint(((2*currentBallX + ballDirectionX)*(blockY - 5)/(2*currentBallY + ballDirectionY)), blockY - 5, BouncePoint.BounceDirection.FLIP_X);
+	  		}
+	  
+	  		if((currentBallX + ballDirectionX) == (blockX + 20) && (currentBallX + ballDirectionX) > currentBallX) {
+	  		return new BouncePoint(((2*currentBallX + ballDirectionX)*(blockY - 5)/(2*currentBallY + ballDirectionY)), blockY - 5, BouncePoint.BounceDirection.FLIP_Y);
+	  		}
+	  	}
+	  	
+	 
+	  	
+	  	if((blockY + 20) < this.getCurrentBallY())
+	  	{
+	  	
+	  		if((this.getCurrentBallX() + this.getBallDirectionX()) != blockX || (this.getCurrentBallX() + this.getBallDirectionX()) != (blockX + 20)) {
+	  			return new BouncePoint(((2*currentBallX + ballDirectionX)*(blockY + 25)/(2*currentBallY + ballDirectionY)), blockY + 25, BouncePoint.BounceDirection.FLIP_Y);
+	  		}
+	  
+	  		if((this.getCurrentBallX() + this.getBallDirectionX()) == blockX && (currentBallX + ballDirectionX) < currentBallX) {
+	  			return new BouncePoint(((2*currentBallX + ballDirectionX)*(blockY + 25)/(2*currentBallY + ballDirectionY)), blockY + 25, BouncePoint.BounceDirection.FLIP_Y);
+	  		}
+	  	
+	  		if((currentBallX + ballDirectionX) == blockX && (currentBallX + ballDirectionX) > currentBallX) {
+	  			return new BouncePoint(((2*currentBallX + ballDirectionX)*(blockY + 25)/(2*currentBallY + ballDirectionY)), blockY + 25, BouncePoint.BounceDirection.FLIP_X);
+	  		}
+	
+	  		if((this.getCurrentBallX() + this.getBallDirectionX()) == (blockX + 20) && (currentBallX + ballDirectionX) < currentBallX) {
+	  			return new BouncePoint(((2*currentBallX + ballDirectionX)*(blockY + 25)/(2*currentBallY + ballDirectionY)), blockY + 25, BouncePoint.BounceDirection.FLIP_X);
+	  		}
 
-        if((currentBallX + ballDirectionX) == (blockX + 20) && (currentBallX + ballDirectionX) > currentBallX) {
-        return new BouncePoint(((2*currentBallX + ballDirectionX)*(blockY + 25)/(2*currentBallY + ballDirectionY)), blockY + 25, BouncePoint.BounceDirection.FLIP_Y);
-        }
-      }
-      
-      
-      
-      if(blockX > this.getCurrentBallX())
-      {
-      
-      if((this.getCurrentBallY() + this.getBallDirectionY()) != blockY || (this.getCurrentBallY() + this.getBallDirectionY()) != (blockY + 20)) {
-          return new BouncePoint(blockX - 5, this.getCurrentBallY() + this.getBallDirectionY(), BouncePoint.BounceDirection.FLIP_X);
-        }
-  
-        if((this.getCurrentBallY() + this.getBallDirectionY()) == blockY) { 
-          return new BouncePoint(blockX - 5, blockY - 5, BouncePoint.BounceDirection.FLIP_X);
-        }
-   
-      if((this.getCurrentBallY() + this.getBallDirectionY()) == (blockY + 20)) {
-          return new BouncePoint(blockX - 5, blockY + 25, BouncePoint.BounceDirection.FLIP_X);
-        }
-      }
-      
-   
-      
-      if(blockX + 20 < this.getCurrentBallX()) {
-   
-        if((this.getCurrentBallY() + this.getBallDirectionY()) != blockY || (this.getCurrentBallY() + this.getBallDirectionY()) != (blockY + 20)) {
-          return new BouncePoint(blockX + 25, this.getCurrentBallY() + this.getBallDirectionY(), BouncePoint.BounceDirection.FLIP_X);
-        }
-    
-        
-        if((this.getCurrentBallY() + this.getBallDirectionY()) == blockY) { 
-          return new BouncePoint(blockX + 25, blockY - 5, BouncePoint.BounceDirection.FLIP_Y);
-        }
-      
-        
-        if((this.getCurrentBallY() + this.getBallDirectionY()) == (blockY + 20)) {
-          return new BouncePoint(blockX + 25, blockY + 25, BouncePoint.BounceDirection.FLIP_Y);
-        }
-      }
-      return null;
+	  		if((currentBallX + ballDirectionX) == (blockX + 20) && (currentBallX + ballDirectionX) > currentBallX) {
+	  		return new BouncePoint(((2*currentBallX + ballDirectionX)*(blockY + 25)/(2*currentBallY + ballDirectionY)), blockY + 25, BouncePoint.BounceDirection.FLIP_Y);
+	  		}
+	  	}
+	  	
+	  	
+	  	
+	  	if(blockX > this.getCurrentBallX())
+	  	{
+	  	
+	  	if((this.getCurrentBallY() + this.getBallDirectionY()) != blockY || (this.getCurrentBallY() + this.getBallDirectionY()) != (blockY + 20)) {
+	  			return new BouncePoint(blockX - 5, this.getCurrentBallY() + this.getBallDirectionY(), BouncePoint.BounceDirection.FLIP_X);
+	  		}
+	
+	  		if((this.getCurrentBallY() + this.getBallDirectionY()) == blockY) { 
+	  			return new BouncePoint(blockX - 5, blockY - 5, BouncePoint.BounceDirection.FLIP_X);
+	  		}
+	 
+	 		if((this.getCurrentBallY() + this.getBallDirectionY()) == (blockY + 20)) {
+	  			return new BouncePoint(blockX - 5, blockY + 25, BouncePoint.BounceDirection.FLIP_X);
+	  		}
+	  	}
+	  	
+	 
+	  	
+	  	if(blockX + 20 < this.getCurrentBallX()) {
+	 
+	  		if((this.getCurrentBallY() + this.getBallDirectionY()) != blockY || (this.getCurrentBallY() + this.getBallDirectionY()) != (blockY + 20)) {
+	  			return new BouncePoint(blockX + 25, this.getCurrentBallY() + this.getBallDirectionY(), BouncePoint.BounceDirection.FLIP_X);
+	  		}
+	  
+	  		
+	  		if((this.getCurrentBallY() + this.getBallDirectionY()) == blockY) { 
+	  			return new BouncePoint(blockX + 25, blockY - 5, BouncePoint.BounceDirection.FLIP_Y);
+	  		}
+	  	
+	  		
+	  		if((this.getCurrentBallY() + this.getBallDirectionY()) == (blockY + 20)) {
+	  			return new BouncePoint(blockX + 25, blockY + 25, BouncePoint.BounceDirection.FLIP_Y);
+	  		}
+	  	}
+	  	return null;
   }
 
   // line 260 "../../../../../Block223States.ump"
    private boolean hitWall(){
     BouncePoint bp = calculateBouncePointWall();
-  
-  
-  setBounce(bp); 
-     
-  return (bp!=null);
+	
+	
+	setBounce(bp); 
+	   
+	return (bp!=null);
   }
 
   // line 268 "../../../../../Block223States.ump"
-   private BouncePoint calculateBouncePointWall(){
+   /*private BouncePoint calculateBouncePointWall(){
          BouncePoint bp = null;
        int ballRadius = Ball.BALL_DIAMETER / 2;
        double BallX =  getCurrentBallX();
@@ -1080,11 +1163,11 @@ if (Dist_a<Dist_b)
          bp = new BouncePoint(385, 5, BounceDirection.FLIP_BOTH);
        }
        else if (boxA.intersectsLine(ballTrajectory)) {
-       //  if (nextBallX <= ballRadius ) {
+         if (BallX <= 10 ) {
           Line2D lineA = new Line2D.Double(ballRadius, ballRadius, ballRadius, (Game.PLAY_AREA_SIDE - ballRadius));
           Point2D intersection = calculateIntersectPoint(ballTrajectory, lineA);
           bp = new BouncePoint(intersection.getX(), intersection.getY(), BounceDirection.FLIP_X);
-         //}
+         }
       }
        else if (boxB.intersectsLine(ballTrajectory)) {
          if (BallY <= ballRadius) {
@@ -1094,89 +1177,155 @@ if (Dist_a<Dist_b)
          }
       }
        else if (boxC.intersectsLine(ballTrajectory)) {
-        // if (nextBallX >= Game.PLAY_AREA_SIDE - ballRadius) {
+         if (nextBallX >= Game.PLAY_AREA_SIDE - ballRadius) {
           Line2D lineC = new Line2D.Double((Game.PLAY_AREA_SIDE - ballRadius), ballRadius, (Game.PLAY_AREA_SIDE - ballRadius), (Game.PLAY_AREA_SIDE - ballRadius));
           Point2D intersection = calculateIntersectPoint(ballTrajectory, lineC);
           bp = new BouncePoint(intersection.getX(), intersection.getY(), BounceDirection.FLIP_X);
-         //}
+         }
       }
        return bp;
-    }
-   private Point2D calculateIntersectPoint(Line2D line1, Line2D line2){
-      if (line1.getX2() == line1.getX1()) {
-          return (new Point2D.Double(line1.getX1(), line2.getY1()));
-        }
-       double m1 = ((line1.getY2() - line1.getY1()) / (line1.getX2() - line1.getX1()));
-        double m2 = ((line2.getY2() - line2.getY1()) / (line2.getX2() - line2.getX1()));
-        double b1 = (line1.getY1() - m1 * line1.getX1());
-        double b2 = (line2.getY1() - m2 * line2.getX1());
-        
-        double x = (b2 - b1) / (m1 - m2);
-        double y = m1 * x + b1;
-        
-        return (new Point2D.Double(x, y));
-        }
+    }*/
    
+   private BouncePoint calculateBouncePointWall(){
+	    BouncePoint bp = null;
+		   int ballRadius = Ball.BALL_DIAMETER / 2;
+		   double BallX =  getCurrentBallX();
+		   double BallY =  getCurrentBallY();
+			double nextBallX = (BallX + getBallDirectionX());
+			double nextBallY = (BallY + getBallDirectionY());
+			Line2D ballTrajectory = new Line2D.Double(BallX, BallY, nextBallX, nextBallY);
+		
+		   Rectangle2D boxA = new Rectangle2D.Double(0, 0, ballRadius, (Game.PLAY_AREA_SIDE - ballRadius));
+		   Rectangle2D boxB = new Rectangle2D.Double(ballRadius, 0, (Game.PLAY_AREA_SIDE - Ball.BALL_DIAMETER), ballRadius);
+		   Rectangle2D boxC = new Rectangle2D.Double((Game.PLAY_AREA_SIDE - ballRadius), 0, ballRadius, (Game.PLAY_AREA_SIDE - ballRadius));
 
+		   if (boxA.intersectsLine(ballTrajectory) && boxB.intersectsLine(ballTrajectory)) {
+			   bp = new BouncePoint(5, 5, BounceDirection.FLIP_BOTH);
+		   }
+		   else if (boxB.intersectsLine(ballTrajectory) && boxC.intersectsLine(ballTrajectory)) {
+			   bp = new BouncePoint(385, 5, BounceDirection.FLIP_BOTH);
+		   }
+		   else if (boxA.intersectsLine(ballTrajectory)) {
+			   if (BallX <= 10) {
+					Line2D lineA = new Line2D.Double(ballRadius, ballRadius, ballRadius, (Game.PLAY_AREA_SIDE - ballRadius));
+					Point2D intersection = calculateIntersectPoint(ballTrajectory, lineA);
+					bp = new BouncePoint(intersection.getX(), intersection.getY(), BounceDirection.FLIP_X);
+			   }
+			}
+		   else if (boxB.intersectsLine(ballTrajectory)) {
+			   if (BallY <= 10) {
+					Line2D lineB = new Line2D.Double(ballRadius, ballRadius, (Game.PLAY_AREA_SIDE - ballRadius), ballRadius);
+					Point2D intersection = calculateIntersectPoint(ballTrajectory, lineB);
+					bp = new BouncePoint(intersection.getX(), intersection.getY(), BounceDirection.FLIP_Y);
+			   }
+			}
+		   else if (boxC.intersectsLine(ballTrajectory)) {
+			   if (BallX >= Game.PLAY_AREA_SIDE - 10) {
+					Line2D lineC = new Line2D.Double((Game.PLAY_AREA_SIDE - ballRadius), ballRadius, (Game.PLAY_AREA_SIDE - ballRadius), (Game.PLAY_AREA_SIDE - ballRadius));
+					Point2D intersection = calculateIntersectPoint(ballTrajectory, lineC);
+					bp = new BouncePoint(intersection.getX(), intersection.getY(), BounceDirection.FLIP_X);
+			   }
+			}
+			   
+		   return bp;
+	  }
+   
+  /* private Point2D calculateIntersectPoint(Line2D line1, Line2D line2){
+	    if (line1.getX2() == line1.getX1()) {
+	    		return (new Point2D.Double(line1.getX1(), line2.getY1()));
+	    	}
+		   double m1 = ((line1.getY2() - line1.getY1()) / (line1.getX2() - line1.getX1()));
+			  double m2 = ((line2.getY2() - line2.getY1()) / (line2.getX2() - line2.getX1()));
+			  double b1 = (line1.getY1() - m1 * line1.getX1());
+			  double b2 = (line2.getY1() - m2 * line2.getX1());
+			  
+			  double x = (b2 - b1) / (m1 - m2);
+			  double y = m1 * x + b1;
+			  
+			  return (new Point2D.Double(x, y));
+			  }
+   
+*/
+   
+   private Point2D calculateIntersectPoint(Line2D line1, Line2D line2){
+	    if (line1.getX2() == line1.getX1()) {	// vertical line
+	    		return (new Point2D.Double(line1.getX1(), line2.getY1()));
+	    	}
+		   double m1 = ((line1.getY2() - line1.getY1()) / (line1.getX2() - line1.getX1()));
+		   if (line2.getX2() == line2.getX1()) {  // vertical line
+			   return (new Point2D.Double(line2.getX1(), line1.getY1()));
+		   }
+			  double m2 = ((line2.getY2() - line2.getY1()) / (line2.getX2() - line2.getX1()));
+			  double b1 = (line1.getY1() - m1 * line1.getX1());
+			  double b2 = (line2.getY1() - m2 * line2.getX1());
+			  
+			  double x = (b2 - b1) / (m1 - m2);
+			  double y = m1 * x + b1;
+			  
+			  return (new Point2D.Double(x, y));
+	  }
+   
+   
+   
   /**
    * Actions
    */
   // line 275 "../../../../../Block223States.ump"
    private void doSetup(){
     resetCurrentBallX();
-     resetCurrentBallY();
-     resetBallDirectionX();
-     resetBallDirectionY();
-     resetCurrentPaddleX();
-     Game game = getGame();
-     Level level = game.getLevel(currentLevel-1);
-     List<BlockAssignment> assignments = level.getBlockAssignments();
-     for(BlockAssignment assignment: assignments) {
-       PlayedBlockAssignment pblock = new PlayedBlockAssignment(Game.WALL_PADDING+(Block.SIZE+Game.COLUMNS_PADDING)*(assignment.getGridHorizontalPosition()-1),Game.WALL_PADDING+(Block.SIZE+Game.ROW_PADDING)*(assignment.getGridVerticalPosition()-1), assignment.getBlock(), this);
-     }
-     while(numberOfBlocks() < game.getNrBlocksPerLevel()) {
-       
-         int n = game.getNrBlocksPerLevel();
-       
-         int maxColumn = (Game.PLAY_AREA_SIDE - 2*(Game.WALL_PADDING) + Game.COLUMNS_PADDING)/Game.COLUMNS_PADDING+Block.SIZE;
-       int minColumn = 1;
-       Random rC = new Random();
-       int index_X = rC.nextInt(Math.abs(maxColumn - minColumn) + 1) + minColumn;
-       
-       int maxRow = maxColumn;
-       int minRow = 1;
-       Random rR = new Random();
-       int index_Y = rR.nextInt((maxRow - minRow) + 1) + minRow;
-       
-       
-       int positionX = Game.WALL_PADDING+(Block.SIZE+Game.COLUMNS_PADDING)*(index_X-1);
-       
-       int positionY = Game.WALL_PADDING+(Block.SIZE+Game.COLUMNS_PADDING)*(index_Y-1);
-  
-       Boolean positionFound = isPositionFree(positionX,positionY);
-       while(!positionFound) {
-         if(index_X<15) {
-           index_X++;
-           positionX = Game.WALL_PADDING+(Block.SIZE+Game.COLUMNS_PADDING)*(index_X-1);
-           }
-           else if(index_Y<maxRow){
-             index_Y++;
-             index_X=1;
-             positionY= Game.WALL_PADDING+(Block.SIZE+Game.COLUMNS_PADDING)*(index_Y-1);
-           }
-           else {
-             index_X=1;
-             index_Y=1;
-             positionX = Game.WALL_PADDING+(Block.SIZE+Game.COLUMNS_PADDING)*(index_X-1);
-             positionY= Game.WALL_PADDING+(Block.SIZE+Game.COLUMNS_PADDING)*(index_Y-1);
-           }
-         positionFound = isPositionFree(positionX,positionY);
-       }
-         
-       PlayedBlockAssignment pblock = new PlayedBlockAssignment(positionX,positionY,game.getRandomBlock(),this);
-       
-       
-     }
+	   resetCurrentBallY();
+	   resetBallDirectionX();
+	   resetBallDirectionY();
+	   resetCurrentPaddleX();
+	   Game game = getGame();
+	   Level level = game.getLevel(currentLevel-1);
+	   List<BlockAssignment> assignments = level.getBlockAssignments();
+	   for(BlockAssignment assignment: assignments) {
+		   PlayedBlockAssignment pblock = new PlayedBlockAssignment(Game.WALL_PADDING+(Block.SIZE+Game.COLUMNS_PADDING)*(assignment.getGridHorizontalPosition()-1),Game.WALL_PADDING+(Block.SIZE+Game.ROW_PADDING)*(assignment.getGridVerticalPosition()-1), assignment.getBlock(), this);
+	   }
+	   while(numberOfBlocks() < game.getNrBlocksPerLevel()) {
+		   
+		   	 int n = game.getNrBlocksPerLevel();
+		   
+		   	 int maxColumn = (Game.PLAY_AREA_SIDE - 2*(Game.WALL_PADDING) + Game.COLUMNS_PADDING)/Game.COLUMNS_PADDING+Block.SIZE;
+			 int minColumn = 1;
+			 Random rC = new Random();
+			 int index_X = rC.nextInt(Math.abs(maxColumn - minColumn) + 1) + minColumn;
+			 
+			 int maxRow = maxColumn;
+			 int minRow = 1;
+			 Random rR = new Random();
+			 int index_Y = rR.nextInt((maxRow - minRow) + 1) + minRow;
+			 
+			 
+			 int positionX = Game.WALL_PADDING+(Block.SIZE+Game.COLUMNS_PADDING)*(index_X-1);
+			 
+			 int positionY = Game.WALL_PADDING+(Block.SIZE+Game.COLUMNS_PADDING)*(index_Y-1);
+	
+			 Boolean positionFound = isPositionFree(positionX,positionY);
+			 while(!positionFound) {
+				 if(index_X<15) {
+					 index_X++;
+					 positionX = Game.WALL_PADDING+(Block.SIZE+Game.COLUMNS_PADDING)*(index_X-1);
+					 }
+					 else if(index_Y<maxRow){
+						 index_Y++;
+						 index_X=1;
+						 positionY= Game.WALL_PADDING+(Block.SIZE+Game.COLUMNS_PADDING)*(index_Y-1);
+					 }
+					 else {
+						 index_X=1;
+						 index_Y=1;
+						 positionX = Game.WALL_PADDING+(Block.SIZE+Game.COLUMNS_PADDING)*(index_X-1);
+						 positionY= Game.WALL_PADDING+(Block.SIZE+Game.COLUMNS_PADDING)*(index_Y-1);
+					 }
+				 positionFound = isPositionFree(positionX,positionY);
+			 }
+		     
+			 PlayedBlockAssignment pblock = new PlayedBlockAssignment(positionX,positionY,game.getRandomBlock(),this);
+		   
+		   
+	   }
   }
 
   // line 332 "../../../../../Block223States.ump"
@@ -1187,39 +1336,39 @@ if (Dist_a<Dist_b)
   // line 337 "../../../../../Block223States.ump"
    private void doOutOfBounds(){
     setLives(getLives()-1);
-     resetCurrentBallX();
-     resetCurrentBallY();
-     resetBallDirectionX();
-     resetBallDirectionY();
-     resetCurrentPaddleX();
+	   resetCurrentBallX();
+	   resetCurrentBallY();
+	   resetBallDirectionX();
+	   resetBallDirectionY();
+	   resetCurrentPaddleX();
   }
 
   // line 346 "../../../../../Block223States.ump"
    private void doHitBlock(){
     int score = getScore();
-   BouncePoint bounce = getBounce();
-     
-      PlayedBlockAssignment pblock = bounce.getHitBlock();
-      Block block = pblock.getBlock();
-      
-      int points = block.getPoints();
-    setScore(score+points);
-    pblock.delete();
-    
+	 BouncePoint bounce = getBounce();
+	   
+	    PlayedBlockAssignment pblock = bounce.getHitBlock();
+	    Block block = pblock.getBlock();
+	    
+	    int points = block.getPoints();
+	  setScore(score+points);
+	  pblock.delete();
+	  
         bounceBall();
   }
 
   // line 361 "../../../../../Block223States.ump"
    private void doHitBlockNextLevel(){
     doHitBlock();
-     int level = getCurrentLevel();
-     setCurrentLevel(level+1);
-     
-     setCurrentPaddleLength
-     (getGame().getPaddle().getMaxPaddleLength()-getGame().getPaddle().getMaxPaddleLength()
-         -(getGame().getPaddle().getMinPaddleLength())/(getGame().numberOfLevels()-1) *(getCurrentLevel()-1));
-     
-     setWaitTime( INITIAL_WAIT_TIME * getGame().getBall().getBallSpeedIncreaseFactor() *(getCurrentLevel()-1));
+	   int level = getCurrentLevel();
+	   setCurrentLevel(level+1);
+	   
+	   setCurrentPaddleLength
+	   (getGame().getPaddle().getMaxPaddleLength()-getGame().getPaddle().getMaxPaddleLength()
+			   -(getGame().getPaddle().getMinPaddleLength())/(getGame().numberOfLevels()-1) *(getCurrentLevel()-1));
+	   
+	   setWaitTime( INITIAL_WAIT_TIME * getGame().getBall().getBallSpeedIncreaseFactor() *(getCurrentLevel()-1));
   }
 
   // line 373 "../../../../../Block223States.ump"
@@ -1235,13 +1384,13 @@ if (Dist_a<Dist_b)
   // line 382 "../../../../../Block223States.ump"
    private void doGameOver(){
     Block223 block223 = this.getBlock223();
-     Player p= getPlayer();
-     if(p!=null) {
-       Game game=getGame();
-       HallOfFameEntry hof = new HallOfFameEntry(score,playername, p, game, block223);
-       game.setMostRecentEntry(hof);
-     }
-     this.delete();
+	   Player p= getPlayer();
+	   if(p!=null) {
+		   Game game=getGame();
+		   HallOfFameEntry hof = new HallOfFameEntry(score,playername, p, game, block223);
+		   game.setMostRecentEntry(hof);
+	   }
+	   this.delete();
   }
 
   // line 395 "../../../../../Block223States.ump"
