@@ -216,21 +216,18 @@ private BouncePoint calculateBouncePointPaddle(){
 	     }
 
 
-	     
-   private Point2D calculateIntersectPoint(Line2D line1, Line2D line2){
-	    if (line1.getX2() == line1.getX1()) {	// vertical line
-	    		return (new Point2D.Double(line1.getX1(), line2.getY1()));
-	    	}
-		   double m1 = ((line1.getY2() - line1.getY1()) / (line1.getX2() - line1.getX1()));
-		   if (line2.getX2() == line2.getX1()) {  // vertical line
-			   return (new Point2D.Double(line2.getX1(), line1.getY1()));
-		   }
-			  double m2 = ((line2.getY2() - line2.getY1()) / (line2.getX2() - line2.getX1()));
-			  double b1 = (line1.getY1() - m1 * line1.getX1());
-			  double b2 = (line2.getY1() - m2 * line2.getX1());
-			  
-			  double x = (b2 - b1) / (m1 - m2);
-			  double y = m1 * x + b1;
-			  
-			  return (new Point2D.Double(x, y));
-	  }
+	     private boolean hitPaddle(){
+    	     	BouncePoint bounceP=calculateBouncePointPaddle();
+  		setBounce(bounceP);
+    		return (bounceP!=null);
+ 	     }
+
+	     private void doHitPaddleOrWall(){
+    		bounceBall();
+ 	     }
+	     private boolean hitWall(){
+   	        BouncePoint bounceP = calculateBouncePointWall();
+		setBounce(bounceP);   
+		return (bounceP!=null);
+             }
+   
