@@ -48,7 +48,7 @@ public static TOHallOfFame getHallOfFame(int start, int end) throws InvalidInput
 		return result;
 	}	
 
-
+//additional method
 	public static TOHallOfFame getHallOfFameWithName(String name, int start, int end) throws InvalidInputException {
 		if(!(Block223Application.getCurrentUserRole() instanceof Player)){
 			throw new InvalidInputException("Player privileges are required to access a game's hall of fame.");
@@ -75,7 +75,7 @@ public static TOHallOfFame getHallOfFame(int start, int end) throws InvalidInput
 		}
 		return result;
 	}
-
+//additional method
 		public static TOHallOfFame getHallOfFameWithMostRecentEntry(int numberOfEntries, String name) throws InvalidInputException {
 		if(!(Block223Application.getCurrentUserRole() instanceof Player)){
 			throw new InvalidInputException("Player privileges are required to access a game's hall of fame.");
