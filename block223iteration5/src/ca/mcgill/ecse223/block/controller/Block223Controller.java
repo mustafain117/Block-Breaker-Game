@@ -492,7 +492,7 @@ public class Block223Controller {
 		Block223Application.resetBlock223(); 
 		
 		if (Block223Application.getCurrentUserRole() != null) {
-			throw new InvalidInputException("Cannot register a new user while a user is logged in.");
+			throw new InvalidInputException("Cannot log in a new user while a user is logged in.");
 		}
 
 		User user = User.getWithUsername(username);
